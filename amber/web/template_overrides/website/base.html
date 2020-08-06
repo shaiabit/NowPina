@@ -1,0 +1,79 @@
+{% load staticfiles %}<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+
+    {% if sidebar %}
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen-alt.css" %}" media="screen" title="Prosimii (Sidebar)" />
+    {% else %}
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-screen.css" %}" media="screen" title="Prosimii" />
+    {% endif %}
+    <link rel="stylesheet alternative" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="screen" title="Print Preview" />
+    <link rel="stylesheet" type="text/css" href="{% static "website/css/prosimii-print.css" %}" media="print" />
+
+    {% block header_ext %}
+    {% endblock %}
+    <title>{{game_name}} - {% if flatpage %}{{flatpage.title}}{% else %}{% block titleblock %}{{page_title}}{% endblock %}{% endif %}</title>
+  </head>
+
+  <body>
+    <!-- For non-visual user agents: -->
+      <div id="top"><a href="#main-copy" class="doNotDisplay doNotPrint">Skip to main content.</a></div>
+
+    <!-- ##### Header ##### -->
+
+    <div id="header">
+      <div class="midHeader">
+        <img src="{% static "website/images/NOW-bmp-icon.png" %}" align='left' />
+        <h1 class="headerTitle" lang='en'>{{game_name}}</h1>
+        <div class="headerSubTitle" title="Slogan">
+        <!-- Insert a slogan here if you want -->
+        Novel Online World  &nbsp;&#8212;&nbsp;
+        {{game_slogan}}			&nbsp;
+        </div>
+        <br class="doNotDisplay doNotPrint" />
+        <div class="headerLinks">
+          <span class="doNotDisplay">Tools:</span>
+          {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Log Out &laquo;</a>
+            <span class="doNotDisplay">|</span>
+            Logged in as {{user.username}} &laquo;
+          {% else %}
+            <a href="{% url 'login' %}">Log In &laquo;</a>
+            <span class="doNotDisplay">|</span>
+            <a href="{% url 'to_be_implemented' %}">Register &laquo;</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="subHeader">
+        <!--span class="doNotDisplay">Navigation:</span-->
+        <a href="/">Home</a> |
+        <a href="https://github.com/evennia/evennia/wiki/Evennia-Introduction/">About</a> |
+        <a href="https://github.com/Pinacolada64/NOW/wiki/#welcome-to-the-now-wiki">Documentation</a> |
+        <a href="{% url 'admin:index' %}">Admin Interface</a>
+        {% if webclient_enabled %}
+         | <a href="{% url 'webclient:index' %}">Play Online</a>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ##### Side Menu ##### -->
+    {% block sidebar %}{% endblock %}
+    <!-- ##### Main Copy ##### -->
+
+    <div id="main-copy">
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <!-- ##### Footer ##### -->
+
+    <div id="footer">
+      <span class="doNotPrint">
+        Powered by Pangolins
+      </span>
+    </div>
+  </body>
+</html>

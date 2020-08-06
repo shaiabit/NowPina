@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block sidebar %}
+{% endblock %}
+
+{% block header_ext %}
+{% endblock %}
+
+{% block content %}
+<div class="rowOfBoxes">
+   <!--div class="twoThirds noBorderOnLeft"-->
+   <div class="noBorderOnLeft">
+      <h1>Welcome to NOW! &#128536;  &#128541;  &#128546;  &#128519; &#128518; &#128520;  &#128527; &#128531;  &#128525; &#128534; &#128526;</h1>
+   </div>
+   <p>NOW stands for "Novel Online World" and is the prototype for future text based worlds. 
+      The framework uses <a href="https://github.com/evennia/evennia">Evennia</a> as the server.
+      It will allow for a world that is in some ways simpler than a TinyMU, allowing you to chat
+      in one channel OOCly with your account name, yet allow you to pursue your own story ICly
+      with one or more characters. Your story might be very MUD-like &#2013; your character versus mobs,
+      puzzles, and environment &#2026; or MUSH-like, with RP or scenes with characters.
+   </p>
+</div>
+<div class="rowOfBoxes dividingBorderAbove">
+   <div class="oneThird noBorderOnLeft">
+      <h2>Current Characters</h2>
+      <p>
+      There's currently <strong>{{num_accounts_connected}}</strong> connected out of a total of <strong>{{num_accounts_registered}}</strong> accounts registered.</p>
+      <h2>Characters</h2>
+      <ul>
+      {% for chars in characters_on_grid %}
+      <li>{{chars.key}}</li>
+      {% endfor %}
+      </ul>
+   </div>
+   <div class="oneThird">
+      <h2>Recently Connected</h2>
+      <ul>
+      {% for account in accounts_connected_recent %}
+      <li>{{account.username}} -- <em>{{account.last_login|timesince}} ago</em></li>
+      {% endfor %}
+      </ul>
+      <p class="filler"><!-- Filler para to extend left vertical line --></p>
+   </div>
+   <div class="oneThird">
+      <h2>Database Stats</h2>
+      <ul>
+      <li>{{num_accounts_registered}} accounts (+ {{num_characters}} characters)</li>
+      <li>{{num_rooms}} rooms (+ {{num_exits}} exits)</li>
+      <li>{{num_others}} other objects</li>
+      </ul>
+   </div>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<trizbort version="1.5.9.5">
+	<info />
+	<map>
+		<room id="1" name="F. Avenue" subtitle="" x="-1392" y="224" w="64" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="This is a $usage() intersection in town. Families, single folks and kids move about the sidewalks. Shops and businesses in all directions are in various states of open and closed. Shine Street is off to the west, and Shade Street is to the east. A curious glossy white stepdisk is set into the pavement here. Curiously there is a hint of everything being a little more |111gray|n here than one would expect." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="2" name="Park Loop" subtitle="" x="-1424" y="32" w="128" h="128" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="yes" octagonal="no" cornerTopLeft="30" cornerTopRight="30" cornerBottomLeft="30" cornerBottomRight="30" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="#FFFFFF" roomSmallText="" />
+		<room id="3" name="Shine Street" subtitle="" x="-1584" y="224" w="96" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="A warm breeze seems to perpetuate at this particular street and intersection as the sun shines quite brightly off the well kept windows of the buildings. Reflections send warm light everywhere and seem to make the entire block naturally light up. Places here provide the basic businesses one might visit for a wide assortment of needs." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="4" name="Shade Street" subtitle="" x="-1232" y="224" w="96" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="This is a quiet and sometimes dark little area.  Old growth trees commonly cover the canopy.  Here one can find thing ones might find difficult to find elsewhere.  Unique shops with one of kind offers and of sometimes questionable nature can found in the shadows.&#xD;&#xA;Generally the folks trat travel through here are quiet or covert, keeping mostly to themselves but occasionally one might approach and make an interesting offer that you will find nowhere else." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="5" name="Sable Suburb" subtitle="" x="-1392" y="-96" w="64" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="The streets of the Sable Suburb are covered in in cobblestone. Typically active with younger folks traveling on and about throughout the day.  &#xD;&#xA;The decor is reminiscent of small European towns with narrow streets and two to three story buildings.  A number of coffee, tea, fineries and other fun shops can be found throughout the area.  &#xD;&#xA;Trees can be seen growing tall along with some areas shorter among others where grass has been grown.  A fountain pours forth water endlessly while statues and many benches are also found along this area." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="8" name="" description="">
+			<dock index="0" id="1" port="e" />
+			<dock index="1" id="4" port="w" />
+		</line>
+		<line id="9" name="" description="">
+			<dock index="0" id="1" port="w" />
+			<dock index="1" id="3" port="e" />
+		</line>
+		<room id="12" name="Fox Fairway" subtitle="" x="-1232" y="64" w="96" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="Breezes blow gently in this area, as old growth tree canopy obscures the skies, though light and blue can be seen through.  Buildings here are made of brick and plenty of overgrowth leave places of calm and quiet.  To the east is the bridge which leads you past the borders of Critter City." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="14" name="Puma Pass" subtitle="" x="-1584" y="64" w="96" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="This area has clean streets with tall old trees and some shrubs, the sidewalks are kept tidy and various activity occurrs through most of the day.  When the night sets, the pass becomes quiet with lots of dark shadowy areas which are frequent for places to hide where private chats occurr.  Smaller businesses and a number of detective agencies can be found along the route." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="20" name="Underground" subtitle="" x="-1688" y="168" w="96" h="32" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="21" name="" description="" startText="down" endText="up">
+			<dock index="0" id="6" port="wsw" />
+			<dock index="1" id="20" port="ene" />
+		</line>
+		<room id="22" name="Skink Street" subtitle="" x="-1232" y="-96" w="96" h="64" region="central" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="This area of the city is fairly secluded with country lanes and much quiet ahead,  This area is perhaps active at times of the day but never ever so busy.  Regulars go from their place of rest to their places of work in a orderly procession." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="23" name="" description="">
+			<dock index="0" id="12" port="n" />
+			<dock index="1" id="22" port="s" />
+		</line>
+		<line id="24" name="" description="">
+			<dock index="0" id="22" port="w" />
+			<dock index="1" id="5" port="e" />
+		</line>
+		<room id="19" name="Laughing Lane" subtitle="" x="-1392" y="-224" w="64" h="64" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="Sunlit meadows appear as you enter a more rural area just outside of Critter City.  The lanes here are more rugged with sometime only rough hewn paths.  &#xD;&#xA;&#xD;&#xA;Fields and farms can seen nearby.  Butterflies flit about flowers and dragonflies hover over places where small ponds of water have settled.  One can always listen for a joyous laugh about the area." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="29" name="Acme" subtitle="" x="-1456" y="-440" w="192" h="152" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="0" cornerTopRight="0" cornerBottomLeft="0" cornerBottomRight="0" borderstyle="Solid" description="This is Zone distinguisher of the &quot;Acme Acres&quot; all names in this box are preceded with the name &quot;Acme&quot;." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="30" name="" description="">
+			<dock index="0" id="5" port="n" />
+			<dock index="1" id="19" port="s" />
+		</line>
+		<line id="31" name="" description="">
+			<dock index="0" id="19" port="n" />
+			<dock index="1" id="29" port="s" />
+		</line>
+		<room id="32" name="Loo" subtitle="" x="-1320" y="-384" w="56" h="96" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="You are standing in front of Acme Looniversity, a school of Higher Learning (and Lower Comedy) that was ever created. &#xD;&#xA;&#xD;&#xA;It's gone through a number of renovations through the years. &#xD;&#xA;Currently it's a gleaming ivory building topped with ruby roofs, and overlooked by the impressive gray white marble clock tower. &#xD;&#xA;&#xD;&#xA;Statues of Loo's most &quot;gifted&quot; alumni such as Bugs Bunny, Daffy Duck, Elmer Fudd, and Yosemite Sam flank the entrance." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="33" name="Acres" subtitle="" x="-1456" y="-392" w="64" h="56" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="0" cornerTopRight="0" cornerBottomLeft="0" cornerBottomRight="0" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="34" name="Alley" subtitle="" x="-1320" y="-440" w="56" h="56" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="0" cornerTopRight="0" cornerBottomLeft="0" cornerBottomRight="0" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="35" name="Downtown" subtitle="" x="-1392" y="-336" w="72" h="48" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="You have arrived at the (in)famous Acme Acres! &#xD;&#xA;&#xD;&#xA;A sign above you welcomes you,  but also warns of falling anvils.  Toons and All are welcome here, however please accept this place for its cartoon nature.  All the colors are brigher and more vivid than one would expect while toons can be distinguished by their fine lines even everyone that enters here seems to have had additional color added on.&#xD;&#xA;" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="36" name="Mall" subtitle="" x="-1392" y="-440" w="72" h="48" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="0" cornerTopRight="0" cornerBottomLeft="0" cornerBottomRight="0" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="37" name="Mail Services" subtitle="" x="-1456" y="-336" w="64" h="48" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="1" cornerTopRight="1" cornerBottomLeft="1" cornerBottomRight="1" borderstyle="Solid" description="Speaking of notoriety, you have entered the industrial section of Acme Acres.  Iron plants, Rube Goldbergs, and anvil factories aboud, every ongoing constructions can always be found and the streets are always busy with activity.  At the center though is the notorious Acme Mail Services, &quot;Where We Guarantee Delivery, but nothing else is Guranteed!&quot;.  " roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="38" name="Farms" subtitle="" x="-1456" y="-440" w="64" h="48" region="NoRegion" handDrawn="yes" allcornersequal="no" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="0" cornerTopRight="0" cornerBottomLeft="0" cornerBottomRight="0" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<room id="39" name="Town Hall" subtitle="" x="-1488" y="-16" w="64" h="48" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="This is a brick constructed building.  However unlike your traditional brick this uses building block bricks in a wide assortment of colours representing the diversity of the things that bring this place together.  There is also a number of conference rooms as well as a room which includes a history of voting with all sorts of ballots." roomFill="#408080" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="#FFFFFF" roomSmallText="" />
+		<room id="40" name="Post Office" subtitle="" x="-1296" y="-16" w="64" h="48" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="The large concrete structure prevents most weather from prevailing much like the saying, &quot;Neither snow nor rain nor heat nor gloom of night...&quot;  The post office is available.  There are a number of counters in front with various attendants through the day as well as a number of Self-Service kiosks.  One can also go to ones post office box and retrieve messages saved for them.  The area is clean and austere, lines rarely get too long 'cept round the holidays.  On the wall are a multitude of stamps from many countries, continents, worlds and even dimensions.  Electronic walls show the latest stamps and delve occasionally into the history of the place the stamps come from." roomFill="#408080" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="#FFFFFF" roomSmallText="" />
+		<room id="41" name="Bank" subtitle="" x="-1296" y="160" w="64" h="48" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="A sign states, &quot;In All We Trust.&quot; The building in constructed of porous stone altered by time and the elements, and seemingly always changing.  Soft light fills the area that occasionally shifts color.    A number of tellers are available as are a number of transaction machines.  Here one can use the currency of the land or exchange it for those of other lands.  Money has only meaning to those who believe in it.   There is a board on one side showing various currency marks the ~ a ? = FEWDACTYLS.  What it means is fairly unknown but for now it provides the layout for the trusts of the land." roomFill="#408080" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="#FFFFFF" roomSmallText="" />
+		<room id="42" name="Real Estate" subtitle="" x="-1488" y="160" w="64" h="48" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="The Real Estate office with its brick and mortar structure has different maps laid out on each wall.  Small tablets are on stands (or available at tables)  allow you to find details about each neighborhood and what is available in Critter City as well as some of the outskirts.  Land isn't usually given out or deeded to folks rather it is leased indefinitely with some exceptions.  It's within the city's right to &quot;Gentrify&quot; places that become forgotten or are not used on a regular basis.  A couple agents are available to discuss specific details or answer general questions.  Since it is a teh real estate is part of the community one needs only go to the local real estate office to find a place.  Additional homes are permissable under specfic conditions, mostly referring to usage." roomFill="#408080" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="#FFFFFF" roomSmallText="" />
+		<room id="43" name="Cat Crawl" subtitle="" x="-1584" y="-96" w="96" h="64" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="Low underlying brush and medium sized trees sporadically spread across the crawl.  This area has lots of hidden little nooks for smaller folk or ones lithe in body.  One can find many places to limbo throughout the crawl as some tree branches extend just a few feet above the ground. This area has infrequent activity as some folks may find it difficult to navigate." roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="44" name="" description="">
+			<dock index="0" id="43" port="e" />
+			<dock index="1" id="5" port="w" />
+		</line>
+		<line id="45" name="" description="">
+			<dock index="0" id="43" port="s" />
+			<dock index="1" id="14" port="n" />
+		</line>
+		<line id="46" name="" description="">
+			<dock index="0" id="14" port="s" />
+			<dock index="1" id="3" port="n" />
+		</line>
+		<line id="47" name="" description="">
+			<dock index="0" id="4" port="n" />
+			<dock index="1" id="12" port="s" />
+		</line>
+		<room id="48" name="Covered Bridge" subtitle="" x="-1064" y="64" w="96" h="64" region="NoRegion" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="49" name="" description="">
+			<dock index="0" id="12" port="e" />
+			<dock index="1" id="48" port="w" />
+		</line>
+		<room id="6" name="Park" subtitle="Open &amp; On Forever" x="-1400" y="56" w="80" h="80" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="yes" octagonal="no" cornerTopLeft="30" cornerTopRight="30" cornerBottomLeft="30" cornerBottomRight="30" borderstyle="Solid" description="This community park is expansive and with a glint of familiarty. There is a post, a lake in the center, an expansive field, as well as some shrubby areas and some bleachers along with a bandstand." roomFill="#008000" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+		<line id="7" name="" description="">
+			<dock index="0" id="5" port="s" />
+			<dock index="1" id="2" port="n" />
+		</line>
+		<line id="10" name="" description="">
+			<dock index="0" id="12" port="w" />
+			<dock index="1" id="2" port="e" />
+		</line>
+		<line id="11" name="" description="">
+			<dock index="0" id="1" port="n" />
+			<dock index="1" id="2" port="s" />
+		</line>
+		<line id="13" name="" description="">
+			<dock index="0" id="14" port="e" />
+			<dock index="1" id="2" port="w" />
+		</line>
+		<line id="15" name="" description="">
+			<dock index="0" id="2" port="ne" />
+			<dock index="1" id="40" port="sw" />
+		</line>
+		<line id="16" name="" description="">
+			<dock index="0" id="2" port="nw" />
+			<dock index="1" id="39" port="se" />
+		</line>
+		<line id="17" name="" description="">
+			<dock index="0" id="2" port="sw" />
+			<dock index="1" id="42" port="ne" />
+		</line>
+		<line id="18" name="" description="">
+			<dock index="0" id="2" port="se" />
+			<dock index="1" id="41" port="nw" />
+		</line>
+		<line id="25" name="" description="" startText="up" endText="down">
+			<dock index="0" id="6" port="wnw" />
+			<dock index="1" id="26" port="e" />
+		</line>
+		<room id="26" name="Sky" subtitle="" x="-1688" y="0" w="96" h="32" region="central" handDrawn="yes" allcornersequal="yes" ellipse="no" roundedCorners="no" octagonal="no" cornerTopLeft="15" cornerTopRight="15" cornerBottomLeft="15" cornerBottomRight="15" borderstyle="Solid" description="" roomFill="" secondFill="" secondFillLocation="Bottom" roomBorder="" roomLargeText="" roomSmallText="" />
+	</map>
+	<settings>
+		<colors>
+			<canvas>White</canvas>
+			<fill>White</fill>
+			<border>MidnightBlue</border>
+			<line>MidnightBlue</line>
+			<selectedLine>SteelBlue</selectedLine>
+			<hoverLine>DarkOrange</hoverLine>
+			<largeText>MidnightBlue</largeText>
+			<smallText>MidnightBlue</smallText>
+			<lineText>MidnightBlue</lineText>
+			<grid>#F5F5F5</grid>
+			<startRoom>GreenYellow</startRoom>
+		</colors>
+		<regions>
+			<central Name="central" TextColor="MidnightBlue">Silver</central>
+			<NoRegion Name="NoRegion" TextColor="Blue">White</NoRegion>
+		</regions>
+		<fonts>
+			<room size="13">Comic Sans MS</room>
+			<object size="11">Comic Sans MS</object>
+			<line size="9">Comic Sans MS</line>
+		</fonts>
+		<grid>
+			<snapTo>yes</snapTo>
+			<visible>yes</visible>
+			<showOrigin>yes</showOrigin>
+			<size>8</size>
+		</grid>
+		<lines>
+			<width>2</width>
+			<handDrawn>yes</handDrawn>
+			<arrowSize>12</arrowSize>
+			<textOffset>4</textOffset>
+		</lines>
+		<rooms>
+			<darknessStripeSize>24</darknessStripeSize>
+			<objectListOffset>4</objectListOffset>
+			<connectionStalkLength>32</connectionStalkLength>
+			<preferredDistanceBetweenRooms>64</preferredDistanceBetweenRooms>
+			<defaultRoomName>Cave</defaultRoomName>
+		</rooms>
+		<ui>
+			<handleSize>12</handleSize>
+			<snapToElementSize>16</snapToElementSize>
+		</ui>
+		<margins>
+			<documentSpecific>no</documentSpecific>
+			<horizontal>0</horizontal>
+			<vertical>0</vertical>
+		</margins>
+		<keypadNavigation>
+			<creationModifier>control</creationModifier>
+			<unexploredModifier>alt</unexploredModifier>
+		</keypadNavigation>
+	</settings>
+</trizbort>
