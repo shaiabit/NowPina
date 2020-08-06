@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 # from django.conf import settings
 from evennia import CmdSet

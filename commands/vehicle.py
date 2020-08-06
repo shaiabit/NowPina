@@ -1,6 +1,7 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 from evennia import CmdSet
+# from commands.vehicle import VDirectionCmdSet
 
 
 class VehicleCmdSet(CmdSet):
@@ -9,6 +10,7 @@ class VehicleCmdSet(CmdSet):
     def at_cmdset_creation(self):
         """Add command to the set - this set will be attached to the vehicle object (item or room)."""
         self.add(CmdVehicle())
+        # self.add(VDirectionCmdSet())
 
 
 class CmdVehicleDefault(MuxCommand):
@@ -25,6 +27,7 @@ class CmdVehicleDefault(MuxCommand):
         outside = where.location
         where.msg_contents(message, exclude=char)
         outside.msg_contents(message, exclude=char)
+        return message
 
 
 class CmdVehicle(CmdVehicleDefault):
@@ -45,17 +48,20 @@ class CmdVehicle(CmdVehicleDefault):
         where = self.obj
         here = char.location
         outside = where.location
-        account = self.account
         setting = where.db.settings or {}
         if 'vehicle' in cmd:
-            account.msg('|wCommand list for %s%s|n:|/|C%s' % (where.STYLE, where.key, '|n, |C'.join(self.aliases)))
+            self.msg('|wCommand list for %s%s|n:|/|C%s' % (where.STYLE, where.key, '|n, |C'.join(self.aliases)))
         if 'operate' in cmd:
+            if lhs.lower() in ('n', 'north', 's', 'south', 'e', 'east', 'w', 'west', 'up', 'down', 'in', 'out',
+                               'ne', 'northeast', 'se', 'southeast', 'nw', 'northeast', 'sw', 'southwest'):
+                where.execute_cmd(lhs)
+                return
             if 'list' in opt:
                 if not where.db.settings:
                     where.db.settings = {}
-                account.msg('Listing %s%s|n control panel settings: |g%s'
-                           % (where.STYLE, where.key, '|n, |g'.join('%s|n: |c%s' % (each, where.db.settings[each])
-                                                                    for each in where.db.settings)))
+                self.msg('Listing %s%s|n control panel settings: |g%s'
+                         % (where.STYLE, where.key, '|n, |g'.join('%s|n: |c%s' % (each, where.db.settings[each])
+                                                                  for each in where.db.settings)))
                 return
             if 'on' in opt or 'off' in opt or 'toggle' in opt or 'set' in opt:
                 action = opt[0]
@@ -82,9 +88,6 @@ class CmdVehicle(CmdVehicleDefault):
                 where.msg_contents(message)
                 where.db.settings = setting
                 return
-            self.send_msg("%s%s|n commands in-operable %s%s|n vehicle to %s." %
-                          (char.STYLE, char.key, where.STYLE, where.key, args))
-            account.msg("%s%s|n commands in-operable %s%s|n vehicle to %s." %
-                       (char.STYLE, char.key, where.STYLE, where.key, args))
-            self.send_msg("%s%s|n does nothing." % (where.STYLE, where.key))
-            account.msg("%s%s|n does nothing." % (where.STYLE, where.key))
+            self.msg(self.send_msg("%s%s|n commands in-operable %s%s|n vehicle to %s." %
+                                   (char.STYLE, char.key, where.STYLE, where.key, args)))
+            self.msg(self.send_msg("%s%s|n does nothing." % (where.STYLE, where.key)))

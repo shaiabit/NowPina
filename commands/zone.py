@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 from evennia.utils import search, utils
 
@@ -16,11 +16,6 @@ class CmdZone(MuxCommand):
     locks = 'cmd:all()'
     help_category = 'System'
     account_caller = True
-
-    # myscript.tags.add('weather', category='climate')
-    # mychair.tags.all(category='flags')  # returns a list of Tags
-    # mychair.tags.remove('furniture')
-    # mychari.tags.clear()
 
     def func(self):
         """ """

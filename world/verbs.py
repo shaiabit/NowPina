@@ -80,22 +80,10 @@ class VerbHandler:
         self.s.account.execute_cmd('examine %s' % self.o.get_display_name(self.s, plain=True))
 
     def exit(self):
-        if self.s.location != self.o:
-            self.s.msg("You are not aboard %s." % self.o.get_display_name(self.s))
-            return
-        exit_message = None
-        if self.o.db.messages and 'exit' in self.o.db.messages:
-            exit_message = self.o.db.messages['exit']
-        self.s.msg("You disembark %s." % self.o.get_display_name(self.s))
-        if exit_message:
-            self.s.location.msg_contents('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message), exclude=self.s)
-            self.o.location.msg_contents('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message))
-        self.s.move_to(self.o.location)
-        if exit_message:
-            self.s.msg('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message))
+        self.leave()
 
     def follow(self):
-        """Set following agreement - caller follows character"""
+        """Set following agreement - subject follows object"""
         if self.o == self.s:
             self.s.msg('You decide to follow your heart.')
             return
@@ -105,7 +93,7 @@ class VerbHandler:
                 self.o.db.followers.remove(self.s)
                 action = 'stop following'
             else:
-                self.o.db.followers.append(caller)
+                self.o.db.followers.append(self.s)
         else:
             self.o.db.followers = [self.s]
         color = 'g' if action == 'follow' else 'r'
@@ -130,6 +118,21 @@ class VerbHandler:
                                          from_obj=self.s, mapping=dict(it=self.o))
             self.o.at_get(self.s)  # calling hook method
 
+    def leave(self):
+        if self.s.location != self.o:
+            self.s.msg("You are not aboard %s." % self.o.get_display_name(self.s))
+            return
+        exit_message = None
+        if self.o.db.messages and 'exit' in self.o.db.messages:
+            exit_message = self.o.db.messages['exit']
+        self.s.msg("You disembark %s." % self.o.get_display_name(self.s))
+        if exit_message:
+            self.s.location.msg_contents('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message), exclude=self.s)
+            self.o.location.msg_contents('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message))
+        self.s.move_to(self.o.location)
+        if exit_message:
+            self.s.msg('%s%s|n %s' % (self.s.STYLE, self.s.key, exit_message))
+
     def puppet(self):
         self.s.account.execute_cmd('@ic %s' % self.o.get_display_name(self.s, plain=True))
 
@@ -138,18 +141,17 @@ class VerbHandler:
         Implements the read command. This simply looks for an
         Attribute "readable_text" on the object and displays that.
         """
-        pose = self.o.ndb.power_pose
+        # pose = self.o.ndb.power_pose
         read_text = self.o.db.readable_text or self.o.db.desc_brief or self.o.db.desc
         if read_text:  # Attribute read_text is defined.
-            self.s.location.msg_contents("%s |g{s}|n reads {o}." % pose,
-                                         mapping=dict(s=self.s, o=self.o))
+            self.s.location.msg_contents('{s} reads {o}.', mapping=dict(s=self.s, o=self.o))
             string = read_text
         else:
             string = "There is nothing to read on %s." % self.o.get_display_name(self.s)
         self.s.msg(string)
 
     def ride(self):
-        """Set riding agreement - caller rides character"""
+        """Set riding agreement - subject rides object"""
         if self.o == self.s:
             return
         action = 'ride'

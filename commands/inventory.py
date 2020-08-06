@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 from evennia.utils import evtable
 from world.helpers import mass_unit
@@ -24,8 +24,10 @@ class CmdInventory(MuxCommand):
         """
         you = self.character
         items = you.contents
+        if not items:
+            self.msg('You are not carrying anything.')
+            return
         items_not_worn = []
-
         wear_table = evtable.EvTable(border="header")
         for item in items:
             if item.db.worn:
@@ -38,7 +40,7 @@ class CmdInventory(MuxCommand):
             i_mass = mass_unit(item.get_mass()) if hasattr(item, 'get_mass') else 0
             second = '(|y%s|n) ' % i_mass if 'weight' in self.switches else ''
             second += item.db.desc_brief or item.db.desc or ''
-            table.add_row('%s' % item.get_display_name(you.sessions, mxp=('sense %s' % item.key)),
+            table.add_row('%s' % item.get_display_name(you, mxp=('sense %s' % item.key)),
                           second or '')
         my_mass, my_total_mass = [mass, you.get_mass() if hasattr(you, 'get_mass') else 0]
         string = "|wYou (%s) and your possessions (%s) total |y%s|n:\n%s" %\
@@ -46,4 +48,4 @@ class CmdInventory(MuxCommand):
                   mass_unit(my_total_mass), table)
         if not wear_table.nrows == 0:
             string += "|/|wYou are wearing:\n%s" % wear_table
-        you.msg(string)
+        self.msg(string)

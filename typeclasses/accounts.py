@@ -21,6 +21,7 @@ possibility to connect with a guest account. The setting file accepts
 several more options for customizing the Guest account system.
 """
 from evennia import DefaultAccount, DefaultGuest
+from django.conf import settings
 
 
 class Account(DefaultAccount):
@@ -93,23 +94,28 @@ class Account(DefaultAccount):
     """
     STYLE = '|[100'
 
+    def at_account_creation(self):
+        """
+        This is called once, the very first time the account is created
+        i.e. first time player registers. Set attributes that all
+        accounts should have, like configuration values etc.
+        """
+        # set an (empty) attribute holding the characters this account has
+        lockstring = 'attrread:perm(wizard);attredit:perm(wizard);' \
+                     'attrcreate:perm(wizard);'
+        self.attributes.add('_playable_characters', [], lockstring=lockstring)
+        self.attributes.add('_saved_protocol_flags', {}, lockstring=lockstring)
+
     def get_display_name(self, looker, **kwargs):
         """Displays the name of the object in a viewer-aware manner."""
-        if self.locks.check_lockstring(looker, "perm(Builders)"):
-            return "%s%s|w(#%s)|n" % (self.STYLE, self.name, self.id)
+        if self.locks.check_lockstring(looker, 'perm(builder)'):
+            return '%s%s|w(#%s)|n' % (self.STYLE, self.name, self.id)
         else:
-            return "%s%s|n" % (self.STYLE, self.name)
+            return '%s%s|n' % (self.STYLE, self.name)
 
     def at_post_login(self, session=None):
-        welcome = ('''
-        |rN  N |y  OOO |g W   W
-        |rNN  N|y OO OO|g W   W
-        |rN N N|y O   O|g W W W
-        |rN  NN|y OO OO|g W W W
-        |r N  N|y  OOO |g  W W
-         ''', 'NOW (in large friendly letters)')
         # if the account has saved protocol flags, apply them to this session.
-        protocol_flags = self.attributes.get("_saved_protocol_flags", None)
+        protocol_flags = self.attributes.get('_saved_protocol_flags', None)
         if session and protocol_flags:
             session.update_flags(**protocol_flags)
 
@@ -124,26 +130,13 @@ class Account(DefaultAccount):
                 self.locks.reset()
         if session:
             webclient = session.protocol_key == 'websocket'
-            text = '' if webclient else welcome[0]
+            text = '' if webclient else settings.WELCOME_TEXT[0]
             text += ('\n|wSuccessful login. Welcome, %s!' % self.key)
             if webclient:
                 session.msg(
-                    image=['http://marketingland.com/wp-content/ml-loads/2014/08/google-now-fade-1920-800x450.jpg'])
+                    image=[settings.WELCOME_URL])
             session.msg(text)
             session.execute_cmd('@ic')
-
-    def at_disconnect(self):
-        super(Account, self).at_disconnect()
-        # sessions = self.sessions.all()
-        # session = sessions[-1]
-        # do_not_exceed = 24  # Keep the last dozen entries
-        # if not self.db.lastsite:
-        #     self.db.lastsite = []
-        # self.db.lastsite = self.db.lastsite.insert(0, (session.address, int(time.time())))
-        # if len(self.db.lastsite) > do_not_exceed:
-        #     self.db.lastsite.pop()
-        # print(session.cmd_total)
-        pass  # Write stats to db.
 
 
 class Guest(DefaultGuest):
@@ -155,7 +148,7 @@ class Guest(DefaultGuest):
 
     def get_display_name(self, looker, **kwargs):
         """Displays the name of the object in a viewer-aware manner."""
-        if self.locks.check_lockstring(looker, "perm(Builders)"):
+        if self.locks.check_lockstring(looker, "perm(builder)"):
             return "%s%s|w(#%s)|n" % (self.STYLE, self.name, self.id)
         else:
             return "%s%s|n" % (self.STYLE, self.name)

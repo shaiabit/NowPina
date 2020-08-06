@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Objects are the base class for items in-world.
 
@@ -10,10 +10,11 @@ so by editing the Tangible class in tangibles.py.
 from evennia import DefaultObject
 from typeclasses.tangibles import Tangible
 from evennia.utils.utils import lazy_property
-from traits import TraitHandler
+from typeclasses.traits import TraitHandler
 from evennia.utils.evmenu import get_input
 from world.helpers import make_bar, mass_unit
 from commands.poll import PollCmdSet
+from django.conf import settings
 
 
 class Junk(DefaultObject):
@@ -29,8 +30,8 @@ class Junk(DefaultObject):
 
         # Set locks: can't do much with this object type
         self.locks.add(';'.join([
-            'get:none()', 'view:none()', 'puppet:none()', 'tell:none()', 'examine:perm(Immortal)',
-            'edit:perm(Immortal)', 'control:perm(Immortal)', 'call:none()']))
+            'get:none()', 'view:none()', 'puppet:none()', 'tell:none()', 'examine:perm(immortal)',
+            'edit:perm(immortal)', 'control:perm(immortal)', 'call:none()']))
 
 
 class Object(Tangible):
@@ -61,16 +62,16 @@ class Object(Tangible):
      date_created (string) - time stamp of object creation
      permissions (list of strings) - list of permission strings
 
-     player (Player) - controlling player (if any, only set together with
+     account (Account) - controlling account (if any, only set together with
                        sessid below)
      sessid (int, read-only) - session id (if any, only set together with
-                       player above). Use `sessions` handler to get the
+                       account above). Use `sessions` handler to get the
                        Sessions directly.
      location (Object) - current location. Is None if this is a room
      home (Object) - safety start-location
      sessions (list of Sessions, read-only) - returns all sessions connected
                        to this object
-     has_player (bool, read-only)- will only return *connected* players
+     has_account (bool, read-only)- will only return *connected* accounts
      contents (list of Objects, read-only) - returns all objects inside this
                        object (including exits)
      exits (list of Objects, read-only) - returns all exits from this
@@ -94,7 +95,7 @@ class Object(Tangible):
     * Helper methods (see src.objects.objects.py for full headers)
 
      search(ostring, global_search=False, attribute_name=None,
-             use_nicks=False, location=None, ignore_errors=False, player=False)
+             use_nicks=False, location=None, ignore_errors=False, account=False)
      execute_cmd(raw_string)
      msg(text=None, **kwargs)
      msg_contents(message, exclude=None, from_obj=None, **kwargs)
@@ -126,14 +127,14 @@ class Object(Tangible):
                             requests a cmdset from this object. The kwargs are
                             not normally used unless the cmdset is created
                             dynamically (see e.g. Exits).
-     at_pre_puppet(player)- (player-controlled objects only) called just
+     at_pre_puppet(account)- (account-controlled objects only) called just
                             before puppeting
-     at_post_puppet()     - (player-controlled objects only) called just
-                            after completing connection player<->object
-     at_pre_unpuppet()    - (player-controlled objects only) called just
+     at_post_puppet()     - (account-controlled objects only) called just
+                            after completing connection account<->object
+     at_pre_unpuppet()    - (account-controlled objects only) called just
                             before un-puppeting
-     at_post_unpuppet(player) - (player-controlled objects only) called just
-                            after disconnecting player<->object link
+     at_post_unpuppet(account) - (account-controlled objects only) called just
+                            after disconnecting account<->object link
      at_server_reload()   - called before server is reloaded
      at_server_shutdown() - called just before server is fully shut down
 
@@ -180,7 +181,7 @@ class Object(Tangible):
                                  object speaks
 
     """
-    STYLE = '|334'
+    STYLE = '|145'
 
     def basetype_setup(self):
         """
@@ -230,16 +231,18 @@ class Object(Tangible):
         this = self.name
         here = self.location
         there = source_location
-        print(there)
-        if not there and here.has_player:
-            # This was created from nowhere and added to a player's
-            # inventory; it's probably the result of a create command.
+        if not there and here.has_account:
+            # When arriving from nowhere and added to an awake object's
+            # inventory, it may be the result of a create command.
             here.msg("You now have %s%s|n in your possession." % (self.STYLE, this))
             return
-        if there and there != here:  # TODO: Possible Evennia FIXME:
+        if there is here:  # No distance traveled, no announce.
+            return
+        if there:  # Travelled from somewhere
             string = "|g%s|n arrives to %s%s|n from %s%s|n." % (this, here.STYLE, here.key, there.STYLE, there.key)
-        else:
-            string = "|g%s|n suddenly appears in %s%s|n from |222Nothingness|n." % (this, here.STYLE, here.key)
+        else:  # Travelled from nowhere
+            string = "|g%s|n suddenly appears in %s%s|n from %s|n." %\
+                     (this, here.STYLE, here.key, settings.NOTHINGNESS)
         here.msg_contents(string, exclude=self)
 
     def at_object_creation(self):
@@ -263,7 +266,7 @@ class Object(Tangible):
         if not self.attributes.has('surface'):
             self.db.surface = {}
         surface = self.db.surface
-        if caller in surface:         
+        if caller in surface:
             return False
         surface[caller] = connection
         self.db.locked = True
@@ -316,7 +319,7 @@ class Object(Tangible):
         for con in visible:
             if con.destination:
                 exits.append(con)
-            elif con.has_player:
+            elif con.has_account:
                 users.append(con)
             else:
                 things.append(con)
@@ -354,7 +357,7 @@ class Consumable(Object):  # TODO: State and analog decay. (State could be discr
     object, to be consumed and decay, break, be eaten, drank, cast,
     burned, or wear out slowly like clothing or furniture.
     """
-    STYLE = '|321'
+    STYLE = '|420'
 
     def consume(self, caller):
         """

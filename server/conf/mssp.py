@@ -4,7 +4,7 @@ MSSP (Mud Server Status Protocol) meta information
 
 MUD website listings (that you have registered with) can use this
 information to keep up-to-date with your game stats as you change
-them. Also number of currently active players and uptime will
+them. Also number of currently active accounts and uptime will
 automatically be reported. You don't have to fill in everything
 (and most are not used by all crawlers); leave the default
 if so needed. You need to @reload the game before updated

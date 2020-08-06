@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 from evennia import syscmdkeys, Command
 from evennia.utils.utils import string_suggestions
@@ -42,7 +42,10 @@ class CmdTry(MuxCommand):
                     here.msg_contents('%s = %s' % (char.ndb.power_pose, args))  # Display as normal pose.
                     char.nattributes.remove('power_pose')  # Flush power pose
                 else:
-                    account.msg(self.suggest_command())
+                    if char.db.settings and char.db.settings.get('auto-say') is True:
+                        account.execute_cmd('say {}'.format(args))
+                    else:
+                        char.msg(self.suggest_command())
                 return
             else:
                 good_targets = self.verb_list(verb)
@@ -52,19 +55,19 @@ class CmdTry(MuxCommand):
                     obj = obj[0] if obj else None
                 if not obj:
                     obj = good_targets[0] if len(good_targets) == 1 else None
-                account.msg('(%s/%s (%s))' % (verb, noun, obj))
+                char.msg('(%s/%s (%s))' % (verb, noun, obj))
                 if obj and obj in good_targets:
                     self.trigger_response(char, verb, obj)
                 else:
                     if good_targets:
                         if obj:
-                            account.msg('You can only %s %s|n.' % (verb, self.style_object_list(good_targets, char)))
+                            char.msg('You can only %s %s|n.' % (verb, self.style_object_list(good_targets, char)))
                         else:
-                            account.msg('You can %s %s|n.' % (verb, self.style_object_list(good_targets, char)))
+                            char.msg('You can %s %s|n.' % (verb, self.style_object_list(good_targets, char)))
                     else:
-                        account.msg('You can not %s %s|n.' % (verb, obj.get_display_name(account)))
+                        char.msg('You can not %s %s|n.' % (verb, obj.get_display_name(account)))
         else:
-            account.msg('|wVerbs to try|n: |g%s|n.' % '|w, |g'.join(verb_list))
+            char.msg('|wVerbs to try|n: |g%s|n.' % '|w, |g'.join(verb_list))
 
     @staticmethod
     def trigger_response(char, verb, obj):
@@ -109,14 +112,14 @@ class CmdTry(MuxCommand):
         """Create default "command not available" error message."""
         raw = self.raw_string.strip()  # The raw command line text, minus surrounding whitespace
         char = self.character
-        message = "|wCommand |n'|y%s|n' |wis not available." % raw
+        message = ["|wCommand |n'|y%s|n' |wis not available." % raw]
         suggestions = string_suggestions(raw, self.cmdset.get_all_cmd_keys_and_aliases(char), cutoff=0.72, maxnum=3)
         if suggestions:
             if len(suggestions) == 1:
-                message += ' Maybe you meant |n"|g%s|n" |w?' % suggestions[0]
+                message.append('Maybe you meant |n"|g%s|n" |w?' % suggestions[0])
             else:
-                message += ' Maybe you meant %s' % '|w, '.join('|n"|g%s|n"' % each for each in suggestions[:-1])
-                message += ' |wor |n"|g%s|n" |w?' % suggestions[-1:][0]
+                message.append('Maybe you meant %s' % '|w, '.join('|n"|g%s|n"' % each for each in suggestions[:-1]))
+                message.append('|wor |n"|g%s|n" |w?' % suggestions[-1:][0])
         else:
-            message += ' Type |n"|ghelp|n"|w for help.'
-        return message
+            message.append('Type |n"|ghelp|n"|w for help.')
+        return ' '.join(message)

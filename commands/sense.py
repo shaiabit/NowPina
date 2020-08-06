@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
 from django.conf import settings
 from evennia import utils
@@ -22,18 +22,21 @@ class CmdSense(MuxCommand):
     """
     key = 'sense'
     aliases = ['l', 'look', 'taste', 'touch', 'smell', 'listen', 'glance']
+    switch_options = ('all',)
     locks = 'cmd:all()'
-    arg_regex = r'\s|$'
 
     def func(self):
         """Handle sensing objects in different ways, including look."""
+        sessions = self.account.sessions.get()
+        session = sessions[-1] if sessions else None
         char = self.character
-        here = char.location if char else None
         account = self.account
+        opt = self.switches
+        here = char.location if char else None
         if not (char and here):
-            account.msg('You sense only |222Nothingness|n.')
+            self.msg('You sense only {}|n.'.format(settings.NOTHINGNESS))
             message = '|gback|n or |ghome' if char else '|g@ic'
-            account.msg('(Type %s|n to return to the NOW.)' % message)
+            self.msg('(Type %s|n to return to the NOW.)' % message)
             return
         args = self.args.strip()
         cmd = self.cmdstring
@@ -57,11 +60,12 @@ class CmdSense(MuxCommand):
         if cmd == 'glance':
             if here and not args:
                 obj = here
-            sights = obj.return_glance(char)
+            oob = 'all' in opt
+            sights = obj.return_glance(char, oob=oob)
             if sights:
-                account.msg('|/You glance at %s and see: %s ' % (obj.get_display_name(char), sights))
+                self.msg('|/You glance at %s and see: %s ' % (obj.get_display_name(char), sights))
             else:
-                account.msg('|/You glance at %s, but see nothing.' % obj.get_display_name(char))
+                self.msg('|/You glance at %s, but see nothing.' % obj.get_display_name(char))
             return
         # senses = obj.db.senses
         # details = obj.db.details
@@ -69,23 +73,23 @@ class CmdSense(MuxCommand):
             if not self.rhs:  # Nothing on the right side
                 # TODO: Delete and verify intent with switches. Mock-up command without switches.
                 # Scan senses before deleting details - make sure not to remove detail if another sense uses it.
-                account.msg('Functionality to delete aspects and details is not yet implemented.' % self.switches)
+                self.msg('Functionality to delete aspects and details is not yet implemented.' % self.switches)
 
                 if aspect:
-                    account.msg("|w%s|n (object) %s%s|n's |g%s|n (aspect)  =  |r (detail removed)" %
-                               (cmd, style, obj_string, aspect))
+                    self.msg("|w%s|n (object) %s%s|n's |g%s|n (aspect)  =  |r (detail removed)" %
+                             (cmd, style, obj_string, aspect))
                 else:
-                    account.msg("|w%s|n (object) %s%s|n  =  |r (detail removed)" %
-                               (cmd, style, obj_string))
+                    self.msg("|w%s|n (object) %s%s|n  =  |r (detail removed)" %
+                             (cmd, style, obj_string))
             else:
                 # TODO: Add and verify intent with switches. Mock-up command without switches.
-                account.msg('Functionality to add aspects and details is not yet implemented.' % self.switches)
+                self.msg('Functionality to add aspects and details is not yet implemented.' % self.switches)
                 if aspect:
-                    account.msg("|w%s|n (object) %s%s|n's |g%s|n (aspect)  =  |c%s|n (detail)" %
-                               (cmd, style, obj_string, aspect, rhs))
+                    self.msg("|w%s|n (object) %s%s|n's |g%s|n (aspect)  =  |c%s|n (detail)" %
+                             (cmd, style, obj_string, aspect, rhs))
                 else:
-                    account.msg("|w%s|n (object) %s%s|n  =  |c%s|n (detail)" %
-                               (cmd, style, obj_string, rhs))
+                    self.msg("|w%s|n (object) %s%s|n  =  |c%s|n (detail)" %
+                             (cmd, style, obj_string, rhs))
             return
         if cmd != 'l' and 'look' not in cmd:  # Doing non-LOOK stuff in here.
             if 'sense' in cmd:
@@ -122,6 +126,8 @@ class CmdSense(MuxCommand):
                                                   (name, obj.get_display_name(char, plain=True), name))
                         elif show_red:
                             collector_list.append("|r%s|n " % name)
+                    if obj is char.location:  # If sensing here, include an OOB glance
+                        char.msg(obj.return_glance(char, oob=True))
                     char.msg(verb_msg + ''.join(collector_list))
             elif 'taste' in cmd or 'touch' in cmd or 'smell' in cmd or 'listen' in cmd:  # Specific sense (not look)
                 if not obj:
@@ -182,5 +188,8 @@ class CmdSense(MuxCommand):
         if not obj.access(char, 'view'):
             char.msg("You are unable to sense '%s'." % args)
             return
-        account.msg(obj.return_appearance(char))  # get object's appearance as seen by char
+        if session.protocol_key == 'websocket':
+            self.msg((obj.return_appearance(char), {'type': 'help'}))  # get object's appearance as seen by char
+        else:
+            self.msg(obj.return_appearance(char))  # get object's appearance as seen by char
         obj.at_desc(looker=char)  # the object's at_desc() method - includes look-notify.

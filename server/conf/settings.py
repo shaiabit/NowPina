@@ -28,57 +28,84 @@ from evennia.settings_default import *
 # Evennia base server config
 ######################################################################
 
-SERVERNAME = "NOW"
+SERVERNAME = 'NOW'
 
-TELNET_PORTS = [4000, 8888]
+TELNET_PORTS = [4000]
 
 WEBSERVER_PORTS = [(8000, 8001)]
 
-IDMAPPER_CACHE_MAXSIZE = 150
+IDMAPPER_CACHE_MAXSIZE = 150  # Keeping cache size small for now
 
-INLINEFUNC_ENABLED = False  # Too buggy to use, currently.
+INLINEFUNC_ENABLED = False  # Needs testing before use.
 
 IDLE_TIMEOUT = 5 * 60 * 60  # 5 hours
+
+DELAY_CMD_LOGINSTART = 0.6
 
 MULTISESSION_MODE = 1
 
 IRC_ENABLED = True  # @irc2chan Public = irc.furnet.org 7000 #NOW NOW
 
+SSH_ENABLED = True  # Activate SSH protocol communication (SecureShell)
+
+SSH_PORTS = [3699]  # Ports to use for SSH
+
+SSL_ENABLED = True  # Activate Telnet+SSL protocol (SecureSocketLibrary) for supporting clients
+
+SSL_PORTS = [8888]  # Ports to use for Telnet+SSL
+
 IN_GAME_ERRORS = False  # Errors in console are sufficient.
 
-SEARCH_MULTIMATCH_REGEX = r"(?P<number>[0-9]+) (?P<name>.*)"
-SEARCH_MULTIMATCH_TEMPLATE = " {number} {name}{aliases}{info}\n"
+SEARCH_MULTIMATCH_REGEX = r'(?P<number>[0-9]+) (?P<name>.*)'
+SEARCH_MULTIMATCH_TEMPLATE = ' {number} {name}{aliases}{info}\n'
+COMMAND_DEFAULT_ARG_REGEX = r'^[ /]+.*$|$'
 
-ENCODINGS = ["utf-8", "latin-1", "ISO-8859-1", "cp437"]
+ENCODINGS = ['utf-8', 'latin-1', 'ISO-8859-1', 'cp437']
 
 ######################################################################
-# Player settings
+# Account settings
 ######################################################################
+
+# The default permission given to all new accounts
+PERMISSION_ACCOUNT_DEFAULT = 'denizen'
 
 HELP_MORE = False
-STARTER_PLAYER_SDESC='This is a new {adjective} {species}'
-STARTER_PLAYER_DESC='Perhaps you might like to suggest it |gdesc|n itself and/or |gchange species to something|n beside what it is not, a total newb.|/|/A |gdesc/brief adj spe|n will make it easier for them to be seen.  Either way its nice to |ghelp|n them out if they are finding it challenging.'
-PERMISSION_HIERARC	HY = ["Guest",  # NOTE: only used if GUEST_ENABLED=True
-                        "Denizen",
-                        "Citizen",
-                        "Helper",
-                        "Crafter",
-                        "Builder",
-                        "Helpstaff",
-                        "Mage",
-                        "Wizard",
-                        "Immortal"]
+PERMISSION_HIERARCHY = ['Guest',      # NOTE: only used if GUEST_ENABLED=True
+                        'Denizen',    # Player
+                        'Citizen',    #
+                        'Helper',     # Helper
+                        'Crafter',    #
+                        'Builder',    # Builder
+                        'Helpstaff',  #
+                        'Mage',       #
+                        'Wizard',     # Admin
+                        'Immortal']   # Developer
 
+######################################################################
+# In-world settings
 ######################################################################
 # Room settings
 ######################################################################
-STARTER_ROOM_SDESC='This is your default room'
-STARTER_ROOM_DESC='"|/You may |gdesc/room ...|n to change it, and you can review |gcolor ansi|n to add effects to spruce it up.|/|/|nYou can always type |groom|n to get back here and can invite folks over with |gsummon|n.|/Have other questions? Use |ghelp|n with only the 1st word of each of those' 
-
-######################################################################
+HOME_ROOM_DESC = 'You may |gdesc/room ...|n to change it, and ' \
+                 'you can review |gcolor ansi|n to add effects ' \
+                 'to spruce it up.|/|/|nYou can always type ' \
+                 '|groom|n to get back here and can invite folks ' \
+                 'over with |gsummon|n.|/Have other questions? ' \
+                 'Use |ghelp|n with only the 1st word of each of those.'
 # Other settings
 ######################################################################
-
-NOTHINGNESS='|=zNo|=wth|=min|=jgn|=ies|=ds|n'
-RAINBOW='|Rr|430a|yi|Gn|bb|co|mw|n'
-APPLE='(|r(|g`|r)|n'
+WELCOME_URL = 'http://lazylion.ddns.net:8000/static/website/images/nowlogo.png'
+WELCOME_TEXT = ('''
+        |rN  N |y  OOO |g W   W
+        |rNN  N|y OO OO|g W   W
+        |rN N N|y O   O|g W W W
+        |rN  NN|y OO OO|g W W W
+        |r N  N|y  OOO |g  W W
+         ''', 'NOW (in large friendly letters)')
+ABOUT_TEXT = 'NOW is an alpha build mu* made possible by early adopters, ' \
+             'testers, and designers who show up regularly, and believe.'
+QUIT_MESSAGE = 'Hope to see you again, soon!' \
+               '|/A survey is available at http://nowsurvey.supernormality.net/ for your thoughts'
+NOTHINGNESS = '|=zNo|=wth|=min|=jgn|=ies|=ds|n'
+RAINBOW = '|Rr|430a|yi|Gn|bb|co|mw'
+APPLE = '|r((|g`|r)|n'

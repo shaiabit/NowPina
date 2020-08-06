@@ -42,7 +42,9 @@ CHARACTER = {'typeclass': 'typeclasses.characters.Character'}
 
 CONSUMABLE = {'typeclass': 'typeclasses.objects.Consumable'}
 
-WEARABLE = {'typeclass': 'world.clothing.Item'}
+WEARABLE = {'typeclass': 'world.clothing.Item', 'key': 'Wearable',
+            'clothing_type': 'fullbody',
+            'desc_brief': 'It looks like something you could wear.'}
 
 HAT = {'prototype': 'WEARABLE'}
 

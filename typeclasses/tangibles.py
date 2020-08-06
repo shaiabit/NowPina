@@ -1,8 +1,10 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from evennia import DefaultObject
+from evennia.utils import inherits_from
 from evennia.utils.utils import lazy_property
-from traits import TraitHandler
-# from effects import EffectHandler
+from typeclasses.traits import TraitHandler
+from functools import reduce
+import time  # Check time since last visit
 
 
 class Tangible(DefaultObject):
@@ -20,34 +22,59 @@ class Tangible(DefaultObject):
     def traits(self):
         return TraitHandler(self)
 
+    def at_object_receive(self, new_arrival, source_location):
+        """
+        When an object enters another.
+
+        Args:
+            new_arrival (Object): the object that just entered this room.
+            source_location (Object): the previous location of new_arrival.
+        """
+        # Add object to "hosted" attribute dictionary on self, keyed by object.
+        # Value is (timestamp, source_location, visit_count)
+        now = int(time.time())
+        last_entry = (self.db.hosted and self.db.hosted.get(new_arrival)) or (now, source_location, 0)
+        visit_count = (last_entry[2] + 1)
+        new_arrival.ndb.last_visit = (last_entry[0], source_location)
+        if self.db.hosted:
+            self.db.hosted[new_arrival] = (now, source_location, visit_count)
+        else:
+            self.db.hosted = {new_arrival: (now, source_location, visit_count)}
+
     def get_display_name(self, viewer, **kwargs):
         """
         Displays the name of the object in a viewer-aware manner.
 
         Args:
             self (Object, Character, Exit or Room):
-            viewer (TypedObject): The object or account that is looking
-                at/getting information for this object.
+            viewer (TypedObject): The Tangible object, account, or session
+                that needs the name of this Tangible object.
         Kwargs:
             pose Return pose appended to name if True
             color Return includes color style markup prefix if True
             mxp Return includes mxp command markup prefix if provided
-            db_id Return includes database id to privliged viewers if True
+            db_id Return includes database id to privileged viewers if True
             plain Return does not include database id or color
         Returns:
             name (str): A string of the sdesc containing the name of the object,
             if this is defined.
                 including the DBREF if viewer is privileged to control this.
         """
+        name = self.key
+        if not viewer:
+            viewer = viewer.get_puppet_or_account
+        if inherits_from(viewer, "evennia.accounts.accounts.DefaultAccount"):
+            viewer = viewer.get_puppet(viewer.sessions.all()[0])  # viewer is an Account, convert to tangible
+        if not (viewer and viewer.has_account):
+            return '{}{}|n'.format(self.STYLE, name)
         color, pose = [kwargs.get('color', True), kwargs.get('pose', False)]  # Read kwargs, set defaults.
         mxp, db_id = [kwargs.get('mxp', False), kwargs.get('db_id', True)]
         if kwargs.get('plain', False):  # "plain" means "without color, without db_id"
             color, db_id = [False, False]
-        name = self.key
         display_name = ("%s%s|n" % (self.STYLE, name)) if color else name
         if mxp:
             display_name = "|lc%s|lt%s|le" % (mxp, display_name)
-        if self.access(viewer, access_type='control') and db_id:
+        if not viewer.account.attributes.has('_quell') and self.access(viewer, access_type='control') and db_id:
             display_name += '|w(#%s)|n' % self.id
         if pose and self.db.messages and (self.db.messages.get('pose') or self.db.messages.get('pose_default')):
             display_pose = self.db.messages.get('pose') if self.db.messages.get('pose', None)\
@@ -87,7 +114,7 @@ class Tangible(DefaultObject):
             message += text
         self.msg(message)
 
-    def return_glance(self, viewer, bool=False):
+    def return_glance(self, viewer, bool=False, oob=False):
         """
         Displays the name or sdesc of the object with its room pose in a viewer-aware manner.
         If self is in Nothingness, shows inventory contents instead of room contents.
@@ -97,6 +124,7 @@ class Tangible(DefaultObject):
             viewer (TypedObject): The object or account that is looking
                 at/getting information for this object.
             bool (bool): Return True instead of a string list.
+            oob (bool): Include viewer as if out of body.
 
         Returns:
             name (str): A string of the name or sdesc containing the name of the objects
@@ -105,9 +133,9 @@ class Tangible(DefaultObject):
         """
         users, things = [], []
         if self.location:
-            visible = (con for con in [self] + self.contents if con != viewer and con.access(viewer, 'view'))
+            visible = (con for con in [self] + self.contents if con.access(viewer, 'view'))
         else:
-            visible = (con for con in self.contents if con != viewer and con.access(viewer, 'view'))
+            visible = (con for con in self.contents if (con != viewer or oob) and con.access(viewer, 'view'))
         for con in visible:
             if con.has_account:
                 users.append(con)
@@ -121,8 +149,15 @@ class Tangible(DefaultObject):
             ut_joiner = ', ' if users and things else ''
             item_list = ", ".join(t.get_display_name(viewer, mxp='sense %s' % t.get_display_name(
                 viewer, plain=True), pose=True) for t in things)
-            return True if bool else (user_list + ut_joiner + item_list).replace('\n', '').replace('.,', ';')
-        return False if bool else '%sYou|n see nothing here.' % viewer.STYLE
+            if bool:
+                return True
+            glance_result = ((user_list + ut_joiner + item_list).replace('\n', '').replace('.,', ';'))
+            end_character = '' if glance_result[-1:] in ('.', '!', '?', ';', ':') else '.'
+            return glance_result + end_character
+        if bool:
+            return False
+        # See your own pose if OOB mode, else there's nothing here except you.
+        return viewer.get_display_name(viewer, pose=True) if oob else '%sYou|n see no items here.' % viewer.STYLE
 
     def return_detail(self, detail_key, detail_sense):
         """

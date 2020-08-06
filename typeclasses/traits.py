@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# https://niflheimproject.wordpress.com/
 """
 Traits Module
 
@@ -219,6 +220,10 @@ Example:
 from evennia.utils.dbserialize import _SaverDict
 from evennia.utils import logger, lazy_property
 from functools import total_ordering
+
+# Exteremely Dodgy thing here..
+_SaverDict.replace = lambda a, b, c: str(a).replace(b,c)
+
 
 TRAIT_TYPES = ('static', 'counter', 'gauge')
 RANGE_TRAITS = ('counter', 'gauge')
