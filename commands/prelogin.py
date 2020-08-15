@@ -216,7 +216,7 @@ class CmdWhoUs(COMMAND_DEFAULT_CLASS):
         string += ' single ' if is_one else ' unique '
         plural = ' is' if is_one else 's are'
         string += 'account%s logged in.' % plural
-        self.caller.msg(table)
+        self.caller.msg(str(table))
         self.caller.msg(string)
 
 
