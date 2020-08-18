@@ -44,7 +44,7 @@ class CmdAudit(MuxCommand):
             import time
             from evennia.utils import utils, evtable
             now = int(time.time())
-            table = evtable.EvTable(border='none', pad_width=0, border_width=0, maxwidth=79)
+            table = evtable.EvTable(border='none', pad_width=0, border_width=0, maxwidth=92)
             table.add_header(obj_name, '|wTimes', '|cLast', '|gFrom')
             table.reformat_column(0, width=25, align='l')
             table.reformat_column(1, width=7, align='c')
