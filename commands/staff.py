@@ -57,7 +57,7 @@ class CmdAudit(MuxCommand):
                 from_name = hosted[each][1].get_display_name(char) if hosted[each][1] else '|where|n'
                 table.add_row(v_name, v_count, utils.time_format(delta_t, 2), from_name)
             self.msg('[begin] Audit showing visits to:')
-            self.msg(table)
+            self.msg(str(table))
             self.msg('[end] Audit of {}'.format(obj_name))
         else:
             self.msg('No audit information for {}.'.format(obj_name))
