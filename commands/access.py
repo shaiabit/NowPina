@@ -1,40 +1,40 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from commands.command import MuxCommand
 
 
 class CmdAccess(MuxCommand):
     """
-    Displays your current world access levels for
-    your current account and character account.
     Usage:
-      access[/option]
-    Options:
-    /groups  - Also displays the system's permission groups hierarchy.
+      access      -  Display your account and character access level.
+      hierarchy   -  Displays the system's permission groups hierarchy.
+      levels      -  Alias for hierarchy.
     """
     key = 'access'
-    options = ('groups',)
+    aliases = ['hierarchy', 'levels']
     locks = 'cmd:all()'
-    help_category = 'System'
+    help_category = 'Information'
+    account_caller = True
 
     def func(self):
         """Load the permission groups"""
         char = self.character
         account = self.account
         hierarchy_full = settings.PERMISSION_HIERARCHY
-        string = ''
-        if 'groups' in self.switches:
-            string = "|wPermission Hierarchy|n (climbing): %s|/" % ", ".join(hierarchy_full)
-        if account.is_superuser:
-            pperms = "<|ySuperuser|n> " + ", ".join(account.permissions.all())
-            cperms = "<|ySuperuser|n> " + ", ".join(char.permissions.all())
+        info = []  # List of info to output to user
+        if 'hierarchy' in self.cmdstring or 'levels' in self.cmdstring:
+            info.append('|wPermission Hierarchy|n (climbing): %s|/' % ", ".join(hierarchy_full))
         else:
-            pperms = ", ".join(account.permissions.all())
-            cperms = ", ".join(char.permissions.all())
-        string += "|wYour Account/Character access|n: "
-        if hasattr(char, 'account'):
-            if char.account.attributes.has("_quell"):
-                string += "|r(quelled)|n "
-            string += "Account: (%s: %s) and " % (account.get_display_name(self.session), pperms)
-        string += "Character (%s: %s)" % (char.get_display_name(self.session), cperms)
-        account.msg(string)
+            pperms = ', '.join(account.permissions.all())
+            cperms = (', '.join(char.permissions.all())) if char else None
+            if account.is_superuser:
+                pperms = '<|ySuperuser|n> ' + pperms
+                cperms = ('<|ySuperuser|n> ' + cperms) if cperms else None
+            info.append('|wYour Account' + ('/Character' if char else '') + ' access|n: ')
+            if account:
+                if account.attributes.has('_quell'):
+                    info.append('|r(quelled)|n ')
+                info.append('Account: (%s: %s)' % (account.get_display_name(account), pperms))
+            if cperms:
+                info.append(' and Character (%s: %s)' % (char.get_display_name(char), cperms))
+        self.msg(''.join(info))

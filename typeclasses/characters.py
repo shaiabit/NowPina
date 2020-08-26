@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Characters are (by default) Objects setup to be puppeted by accounts.
 They are what you "see" in game. The Character class in this module
@@ -8,13 +8,16 @@ creation commands.
 from evennia import DefaultCharacter
 from typeclasses.tangibles import Tangible
 from evennia.utils.utils import lazy_property
-from traits import TraitHandler
+from typeclasses.traits import TraitHandler
 from world.helpers import make_bar, mass_unit
 from evennia.contrib.clothing import get_worn_clothes
 from evennia.utils import list_to_string
+from evennia.utils import ansi
 # from evennia.utils.utils import delay  # Delay a follower's arrival after the leader
 from evennia.comms.models import ChannelDB, Msg  # To find and
 from evennia.comms.channelhandler import CHANNELHANDLER  # Send to public channel
+from django.conf import settings
+import time  # Check time since last visit
 
 
 class Character(DefaultCharacter, Tangible):
@@ -36,6 +39,71 @@ class Character(DefaultCharacter, Tangible):
                     has connected" message echoed to the room
     """
     STYLE = '|c'
+
+    def at_object_creation(self):
+        """Initialize a newly-created Character"""
+        super(Character, self).at_object_creation()
+        new_locks = ';'.join(
+            ('drop:all(); mail:all();view:all();follow:all()',
+             'examine:perm(helpstaff)', 'tell:perm(wizard)',
+             'delete:perm(immortal)', 'call:false(); get:false()'))
+        self.locks.add(new_locks)  # Add these new locks to the character
+        # Check to see if Character has an object dictionary
+        if not self.db.objects:   # Prime non-existent objects attribute
+            self.db.objects = {}  # with empty list
+        # Check to see if Character has a home room set.
+        home_room = self.db.objects.get('home')
+        if not home_room:  # if self has no home room,
+            home_room = self.assign_room()  # call the assign_room method.
+            self.db.objects['home'] = home_room  # Set the character's home room
+        self.db.last_room = self.home  # Set back point to global default home
+        self.home = home_room  # Set home to home room
+        self.ndb.home_room = home_room  # Store for user later.
+
+    def assign_object(self):
+        """
+        This is where the new character is given a choice to receive one of several
+        new object types, limit one per character. Offer void where prohibited.
+        """
+        #  piece of clothing (or jewelry), dice, canister, weapon, furniture, or plush/soft sculpt critter.
+        choices = ['wearable (jewelry/clothing', 'deluxe RP dice',
+                   'small weapon for defense', 'furnishing for your room',
+                   'plush or soft sculpt huggable creature']
+
+        def scrambled(orig):
+            """
+            Given an iterable, returns a shuffled list of it.
+            """
+            import random  # used for the "scrambled" method.
+            dest = orig[:]
+            random.shuffle(dest)
+            return dest
+
+        self.msg("A {} lands beside you in {}!".format(scrambled(choices).pop(),  # Deal a random choice card.
+                 self.location.get_display_name(self)))
+        # This is an initial test. Choice will be dispensed from a vending machine later.
+
+    def assign_room(self):
+        """
+        Spawn a new home room for this character.
+        Set locks:  set "owner" to edit/control lock,
+        set owner's home there, (self.home = there)
+        set owner's home room there.
+            (self.db.objects['home'] = there)
+        Move owner there?
+        """
+        # Spawn a new room with locks:
+        home_room_name = self.name + "'s place"
+        home_room_desc = settings.HOME_ROOM_DESC
+        home_room_locks = 'control:id({0}) or perm(wizard);edit:id({0}) ' \
+                          'or perm(helpstaff)'.format(self.id)
+        home_room_tags = [('private', 'flags', True)]
+        home_room = {'typeclass': 'typeclasses.rooms.Room', 'key': home_room_name, 'desc': home_room_desc,
+                     'locks': home_room_locks, 'tags': home_room_tags}
+#        from evennia.utils.spawner import spawn  # Import the spawn utility just before using it.
+        from evennia.prototypes.spawner import spawn
+        room = spawn(home_room)  # Calling spawn utility to create the home room.
+        return room[0]  # Return the first (and only) object created, the room.
 
     def at_before_move(self, destination):
         """
@@ -84,7 +152,8 @@ class Character(DefaultCharacter, Tangible):
             self.msg(self.db.messages.get('location') + loc_name)
         if source_location:  # Is "None" when moving from Nothingness. If so, do nothing.
             self.ndb.last_location = source_location
-            if not source_location.destination:
+            # If the last room was a private room, no going back.
+            if not (source_location.destination or source_location.tags.get('private', category='flags')):
                 self.db.last_room = source_location
         if self.location:  # Things to do after the character moved somewhere
             if self.db.messages:
@@ -92,9 +161,10 @@ class Character(DefaultCharacter, Tangible):
             if self.location.access(self, 'view'):  # No need to look if moving into Nothingness, locked from looking
                 if not self.db.settings or self.db.settings.get('look arrive', default=True):
                     self.msg(text=(self.at_look(self.location), dict(type='look', window='room')))
-            if source_location and self.db.followers and len(self.db.followers) > 0 and self.ndb.exit_used:
+            followers = self.db.followers
+            if source_location and (not not followers) and self.ndb.exit_used:
                 for each in source_location.contents:
-                    if not each.has_account or each not in self.db.followers or not self.access(each, 'view'):
+                    if not each.has_account or each not in followers or not self.access(each, 'view'):
                         continue  # no account, not on follow list, or can't see character to follow, then do not follow
                     # About to follow - check if follower is riding something:
                     riding = False
@@ -113,7 +183,7 @@ class Character(DefaultCharacter, Tangible):
         called while we are still standing in the old
         location.
         Args:
-            destination (Object): The place we are going to.
+            destination (Object): The place that the object is going
         """
         here = self.location
         if not here:
@@ -128,16 +198,16 @@ class Character(DefaultCharacter, Tangible):
             name = self.get_display_name(viewer, color=False)
             loc_name = self.location.get_display_name(viewer)
             dest_name = destination.get_display_name(viewer)
-            string = '|r%s' % name
+            message = ['|r%s' % name]
             if self.ndb.riders and len(self.ndb.riders) > 0:  # Plural exit message: Riders
                 if len(self.ndb.riders) > 1:
-                    string += ', |r' + '%s|n' % '|n, |r'.join(rider.get_display_name(viewer, color=False)
-                                                              for rider in self.ndb.riders[:-1])
-                string += ' and |r%s|n are ' % self.ndb.riders[-1].get_display_name(viewer, color=False)
+                    for rider in self.ndb.riders[:-1]:
+                        message.append('|n, |r' + rider.get_display_name(viewer, color=False))
+                message.append(' and |r%s|n are ' % self.ndb.riders[-1].get_display_name(viewer, color=False))
             else:  # Singular exit message: no riders
-                string += ' is '
-            string += "leaving %s, heading%s for %s." % (loc_name, direction_name, dest_name)
-            viewer.msg(string)
+                message.append(' is ')
+            message.append('leaving %s, heading%s for %s.' % (loc_name, direction_name, dest_name))
+            viewer.msg(''.join(message))
 
     def announce_move_to(self, source_location):
         """
@@ -150,36 +220,35 @@ class Character(DefaultCharacter, Tangible):
         if not source_location and self.location.has_account:
             # This was created from nowhere and added to a account's
             # inventory; it's probably the result of a create command.
-            string = "You now have %s in your possession." % (self.get_display_name(here))
-            here.msg(string)
+            here.msg('You now have {} in your possession.'.format(self.get_display_name(here)))
             return
         direction_name = ('|lc%s|lt|530%s|n|le' % (self.ndb.moving_from,
                                                    self.ndb.moving_from)) if self.ndb.moving_from else ''
         for viewer in here.contents:
             if viewer == self:
                 continue
-            src_name = '|222Nothingness'
+            src_name = settings.NOTHINGNESS
             if source_location:
                 src_name = source_location.get_display_name(viewer)
-            string = '|g%s' % self.get_display_name(viewer, color=False)
+            message = ['|g%s' % self.get_display_name(viewer, color=False)]
             if here:
                 depart_name = here.get_display_name(viewer)
             else:
-                depart_name = '|222Nothingness'
+                depart_name = settings.NOTHINGNESS
             if self.ndb.riders and len(self.ndb.riders) > 0:
                 if len(self.ndb.riders) > 1:
-                    string += ', |g' + '%s' % '|n, |g'.join(rider.get_display_name(viewer, color=False)
-                                                            for rider in self.ndb.riders[:-1])
-                    string += "|n and |g%s|n arrive " % self.ndb.riders[-1].get_display_name(viewer, color=False)
+                    message.append(', |g' + '%s' % '|n, |g'.join(rider.get_display_name(viewer, color=False))
+                                   for rider in self.ndb.riders[:-1])
+                    message.append('|n and |g%s|n arrive ' % self.ndb.riders[-1].get_display_name(viewer, color=False))
                 else:
-                    string += ' and |g%s|n arrive ' % self.ndb.riders[-1].get_display_name(viewer, color=False)
+                    message.append(' and |g%s|n arrive ' % self.ndb.riders[-1].get_display_name(viewer, color=False))
             else:
-                string += ' arrives '
+                message.append(' arrives ')
             if direction_name:
-                string += "to %s|n from the %s from %s|n." % (depart_name, direction_name, src_name)
+                message.append('to %s|n from the %s from %s|n.' % (depart_name, direction_name, src_name))
             else:
-                string += "to %s|n from %s|n." % (depart_name, src_name)
-            viewer.msg(string)
+                message.append('to %s|n from %s|n.' % (depart_name, src_name))
+            viewer.msg(''.join(message))
         if self.ndb.riders and len(self.ndb.riders) > 0:
             for each in self.ndb.riders:
                 success = each.move_to(here, quiet=True, emit_to_obj=None, use_destination=False,
@@ -225,9 +294,19 @@ class Character(DefaultCharacter, Tangible):
         """
         sessions = self.sessions.get()
         session = sessions[-1] if sessions else None
-        if len(sessions) == 1:
+        if len(sessions) == 1:  # Skip re-stamping if the object is already puppeted.
+            # After an account connects to a character, set the character's timestamp on:
+            # Add object to "puppeted" attribute dictionary on self, keyed by self.account.
+            # Value is (timestamp on, timestamp off, puppet_count)
+            now = int(time.time())
+            last_entry = (self.db.puppeted and self.db.puppeted.get(self.account)) or (now, now, 0)
+            puppet_count = (last_entry[2] + 1)
+            if self.db.puppeted:
+                self.db.puppeted[self.account] = (now, None, puppet_count)
+            else:
+                self.db.puppeted = {self.account: (now, None, puppet_count)}
             channel = ChannelDB.objects.channel_search('Public')
-            if channel[0]:
+            if channel and channel[0]:
                 channel[0].msg('|c%s |gis now active.' % self.key, keep_log=True)
             text = 'fades into view' if self.location != self.home else 'awakens'
             for each in self.location.contents:
@@ -268,8 +347,17 @@ class Character(DefaultCharacter, Tangible):
                 each.msg('|r%s|n %s.' % (self.get_display_name(each, color=False), text), from_obj=self)
             self.db.prelogout_location = self.location
             if not self.has_account:  # if no sessions control it anymore...
+                # After an account disconnects from a character, set the character's timestamp off:
+                # Add object to "puppeted" attribute dictionary on self, keyed by account.
+                # Value is (timestamp on, timestamp off, puppet_count)
+                now = int(time.time())
+                last_entry = (self.db.puppeted and self.db.puppeted.get(account)) or (now, now, 0)
+                if self.db.puppeted:
+                    self.db.puppeted[account] = (last_entry[0], now, last_entry[2])
+                else:
+                    self.db.puppeted = {account: (last_entry[0], now, last_entry[2])}
                 channel = ChannelDB.objects.channel_search('Public')
-                if channel[0]:
+                if channel and channel[0]:
                     channel[0].msg('|c%s |ris now inactive.' % self.key, keep_log=True)
                 if not at_home:  # ... and its not home...
                     self.location = None  # store in Nothingness.
@@ -286,7 +374,7 @@ class Character(DefaultCharacter, Tangible):
             sdesc (str): The processed sdesc ready
                 for display.
         """
-        if self.check_permstring('Mages'):
+        if self.check_permstring('mage'):
             return '%s%s|n [|[G%s|n]' % (obj.STYLE, sdesc, obj.key)
         else:
             return '%s%s|n' % (obj.STYLE, sdesc)
@@ -351,26 +439,26 @@ class Character(DefaultCharacter, Tangible):
             else:
                 if not con.db.worn:
                     things.append(con)
-        string = "\n%s" % self.get_display_name(viewer, mxp='sense %s' % self.get_display_name(viewer, plain=True))
+        message = ['\n%s' % self.get_display_name(viewer, mxp='sense %s' % self.get_display_name(viewer, plain=True))]
         if self.location and self.location.tags.get('rp', category='flags'):
             pose = self.db.messages and self.db.messages.get('pose', None)
-            string += ' %s' % pose or ''
+            message.append(' %s' % pose or '')
         if self.traits.mass and self.traits.mass.actual > 0:
-            string += " |y(%s)|n " % mass_unit(self.get_mass())
+            message.append(' |y(%s)|n ' % mass_unit(self.get_mass()))
         if self.traits.health:  # Add character health bar if character has health.
-            gradient = ["|[300", "|[300", "|[310", "|[320", "|[330", "|[230", "|[130", "|[030", "|[030"]
+            gradient = ['|[300', '|[300', '|[310', '|[320', '|[330', '|[230', '|[130', '|[030', '|[030']
             health = make_bar(self.traits.health.actual, self.traits.health.max, 20, gradient)
-            string += " %s\n" % health
+            message.append(' %s\n' % health)
         else:
-            string += "\n"
+            message.append('\n')
         desc = self.db.desc
         desc_brief = self.db.desc_brief
         if desc:
-            string += "%s" % desc
+            message.append('%s' % desc)
         elif desc_brief:
-            string += "%s" % desc_brief
+            message.append('%s' % desc_brief)
         else:
-            string += 'A shimmering illusion shifts from form to form.'
+            message.append('A shimmering illusion shifts from form to form.')
         # ---- Allow clothes wearing to be seen
         worn_string_list = []
         clothes_list = get_worn_clothes(self, exclude_covered=True)
@@ -382,19 +470,19 @@ class Character(DefaultCharacter, Tangible):
             elif garment.db.worn:
                 worn_string_list.append("%s %s" % (garment.name, garment.db.worn))
         if worn_string_list:  # Append worn clothes.
-            string += "|/|/%s is wearing %s." % (self, list_to_string(worn_string_list))
+            message.append('|/|/%s is wearing %s.' % (self, list_to_string(worn_string_list)))
         # ---- List things carried (excludes worn things)
         if users or things:
             user_list = ", ".join(u.get_display_name(viewer) for u in users)
             ut_joiner = ', ' if users and things else ''
             item_list = ", ".join(t.get_display_name(viewer) for t in things)
-            string += "\n|wYou see:|n " + user_list + ut_joiner + item_list
+            message.append('\n|wYou see:|n ' + user_list + ut_joiner + item_list)
         # ---- Look Notify system:
         if self != char:
             if not (self.db.settings and 'look notify' in self.db.settings
                     and self.db.settings['look notify'] is False):
                 self.msg("%s just looked at you." % char.get_display_name(self))
-        return string
+        return ''.join(message)
 
 
 class NPC(Character):
@@ -404,7 +492,10 @@ class NPC(Character):
     def at_object_creation(self):
         """Initialize a newly-created NPC"""
         super(NPC, self).at_object_creation()
-        self.cmdset.add('commands.battle.BattleCmdSet', permanent=True)
+        pass
+
+    def assign_room(self):
+        return self.home  # NPC home is default.
 
     def at_post_puppet(self):
         """
@@ -421,6 +512,16 @@ class NPC(Character):
                     continue
                 each.msg("%s looks more awake." % self.get_display_name(each), from_obj=self)
         else:
+            # After an account connects to a character, set the NPC's timestamp on:
+            # Add object to "puppeted" attribute dictionary on self, keyed by self.account.
+            # Value is (timestamp on, timestamp off, puppet_count)
+            now = int(time.time())
+            last_entry = (self.db.puppeted and self.db.puppeted.get(self.account)) or (now, now, 0)
+            puppet_count = (last_entry[2] + 1)
+            if self.db.puppeted:
+                self.db.puppeted[self.account] = (now, None, puppet_count)
+            else:
+                self.db.puppeted = {self.account: (now, None, puppet_count)}
             for each in self.location.contents:
                 if not each.access(self, 'view'):
                     continue
@@ -445,8 +546,25 @@ class NPC(Character):
                         continue
                     each.msg("%s looks sleepier." % (self.get_display_name(each)), from_obj=self)
             else:  # Show as sleeping if NPC has no account logged in.
+                # After an account disconnects from a character, set the NPC's timestamp off:
+                # Add object to "puppeted" attribute dictionary on self, keyed by account.
+                # Value is (timestamp on, timestamp off, puppet_count)
+                now = int(time.time())
+                last_entry = (self.db.puppeted and self.db.puppeted.get(account)) or (now, now, 0)
+                if self.db.puppeted:
+                    self.db.puppeted[account] = (last_entry[0], now, last_entry[2])
+                else:
+                    self.db.puppeted = {account: (last_entry[0], now, last_entry[2])}
                 for each in self.location.contents:
                     if not each.access(self, 'view'):
                         continue
                     each.msg("|r%s|n sleeps." % self.get_display_name(each, color=False), from_obj=self)
             self.db.prelogout_location = self.location
+
+
+
+
+class ColorlessCharacter(Character, Tangible):
+    def msg(self, text=None, from_obj=None, session=None, options=None, **kwargs):
+        super().msg(text=ansi.strip_ansi(text), from_obj=from_obj, session=session, options=options **kwargs)
+

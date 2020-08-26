@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Connection screen
 
@@ -21,14 +21,9 @@ from evennia import utils
 CONNECTION_SCREEN = r"""
 Welcome to the Novel Online World (NOW) 
 
-========= a New Frontier in Text Based Online Gaming =========
- If you have an existing account, connect to it by typing:
-      connect <username> <password>
+======= a New Frontier in Text Based Online Gaming ========
  If you need to create an account, type (without the <>'s):
-      create <username> <password>
+      create <account> <password>
 
-    HELP for more info.     LOOK will re-show this screen.
-
-   If you have spaces in your username,
-        enclose your name in double quotes.
-=============================================================="""
+   HELP for more info.    LOOK will re-show this screen.
+==========================================================="""

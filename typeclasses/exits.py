@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Exits are connectors between Rooms. An exit always has a destination property
 set and has a single command defined on itself with the same name as its key,
@@ -10,7 +10,8 @@ from evennia import utils, Command
 from evennia import DefaultExit
 from typeclasses.tangibles import Tangible
 from evennia.utils.utils import lazy_property
-from traits import TraitHandler
+from django.conf import settings
+from typeclasses.traits import TraitHandler
 
 
 MOVE_DELAY = dict(stroll=16, walk=8, run=4, sprint=2, scamper=1)  # TODO Lookup, calculate
@@ -88,7 +89,7 @@ class Exit(DefaultExit, Tangible):
         else:
             leads_to = self.destination.get_display_name(
                 viewer, mxp='sense ' + self.destination.key) if self.destination else\
-                '|112Nothingness|n. |lcback|ltGo |gback|le.'
+                (settings.NOTHINGNESS + '|n. |lcback|ltGo |gback|le.')
             desc_seen += "leads to %s" % leads_to
         if exits:
             desc_seen += "\n|wExits: " + ", ".join(e.get_display_name(viewer) for e in exits)
@@ -189,6 +190,7 @@ class Exit(DefaultExit, Tangible):
         if text and self.tags.get('pool') and 'Portal' not in text:  # TODO: excluding send to exits to avoid loops.
             self.destination.msg_contents('|b%s|n: %s' % (self.key, text))
         return True
+
 
 SPEED_DESCS = dict(stroll='strolling', walk='walking', run='running', sprint='sprinting', scamper='scampering')
 

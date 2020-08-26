@@ -25,7 +25,7 @@ var options = {};
 // Manage history for input line
 var input_history = function() {
     var history_max = 21;
-    var history = [];
+    var history = new Array();
     var history_pos = 0;
 
     history[0] = ''; // the very latest input is empty for new entry.
@@ -175,8 +175,11 @@ function onKeydown (event) {
     }
 
     if (code === 27) { // Escape key
-        closePopup("#optionsdialog");
-        closePopup("#helpdialog");
+        if ($('#helpdialog').is(':visible')) {
+          closePopup("#helpdialog");
+        } else {
+          closePopup("#optionsdialog");
+        }
     }
 
     if (history_entry !== null) {

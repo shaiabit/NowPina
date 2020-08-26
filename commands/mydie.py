@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 import random
 from builtins import range
 from commands.command import MuxCommand
@@ -23,9 +23,11 @@ class CmdMyDieDefault(MuxCommand):
 
     def roll_dice(self, dicenum, dicetype, modifier=None, conditional=None, return_tuple=False):
         """many sided-dice roller"""
-        dice_num = int(dicenum)
-        dice_type = int(dicetype)
-        rolls = tuple([randint(1, dice_type) for roll in range(dice_num)])
+        dice_num = max(1, int(dicenum))
+        dice_type = max(1, int(dicetype))
+        if not (dice_num and dice_type):  # Either can't be 0, None, or False
+            return None
+        rolls = tuple([randint(1, dice_type) for _ in range(dice_num)])
         result = sum(rolls)
         if modifier:  # make sure to check types well before eval
             mod, mod_value = modifier
@@ -128,3 +130,60 @@ class CmdMyDie(CmdMyDieDefault):
             # Use switches to determine what to do, check for conflict no add & rem
             # Inform use they have create die name they now need to /add faces
             pass  # Design structure of dictionary is shown in EXAMPLE_SET
+
+
+class CmdRoll(CmdMyDieDefault):
+    """
+    Usage:
+      roll [xdy]
+    x number of y-sided dice, defaults to rolling a single d6
+    Options:
+      /sum  - show intermediate summation values
+    """
+    key = 'roll'
+    options = ('sum',)
+    locks = 'cmd:all()'
+    help_category = 'Game'
+    account_caller = True
+    parse_using = 'd'
+
+    def func(self):
+        """
+        Rolls xdy: x number of y-sided dice.
+        """
+        if self.lhs:
+            try:
+                lhs = int(self.lhs)
+            except ValueError:
+                lhs = 1  # Force default of rolling 1 die if user-provided input fails
+        else:
+            lhs = 1
+        if self.rhs:
+            try:
+                rhs = int(self.rhs)
+            except ValueError:
+                rhs = 6  # Force default of 6-sided dice if user-provided input fails
+        else:
+            rhs = 6
+        if lhs > 1000 or rhs > 1000000:
+            self.msg('Roll: Number of sides must be less than '
+                     'a million and number of dice must be less than a thousand.')
+            return
+        result = self.roll_dice(lhs, rhs, return_tuple=True)
+        if not result:
+            self.msg('Roll: Number of sides and number of dice must be greater than zero.')
+            return
+        total = result[0]
+        rolls = result[3]
+        rolling = len(rolls)
+        rollers = 'dice' if rolling > 1 else 'die'
+        if rolling > 1:
+            if 'sum' in self.switches:
+                self.msg('{0} imaginary {1}-sided {2} roll {3} for a total of {4}.'.format(
+                    rolling, rhs, rollers, repr(rolls), total))
+            else:
+                self.msg('{0} imaginary {1}-sided {2} roll a total of {3}.'.format(
+                    rolling, rhs, rollers, total))
+        else:
+            self.msg('{0} imaginary {1}-sided {2} rolls {3}.'.format(
+                rolling, rhs, rollers, total))

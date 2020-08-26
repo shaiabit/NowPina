@@ -1,6 +1,6 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 from commands.command import MuxCommand
-from world.helpers import escape_braces
+from world.helpers import escape_braces, substitute_objects
 from evennia.utils import ansi
 
 
@@ -14,7 +14,7 @@ class CmdPose(MuxCommand):
       pose[/option]'s <pose text>
       do[/option] <pose text>
       do[/option] <target>=<pose text>
-      pp[/option] <parse> = <pose text> 
+      pp[/option] <parse> = <pose text>
     Options:
     /ooc  (Out-of-character to the room or channel.)
     /magnet  (Show which characters remove name/pose space.)
@@ -38,13 +38,14 @@ class CmdPose(MuxCommand):
     # (optional success message if anvil can be lifted.)
     key = 'pose'
     aliases = ['p:', 'pp', 'ppose', ':', ';', 'rp', 'do', 'doing']
+    arg_regex = None
     options = ('ooc', 'magnet', 'do', 'reset', 'default', 'quiet', 'silent')
     locks = 'cmd:all()'
     account_caller = True
 
     def set_doing(self, setter, pose, target=None, default=False):
         """
-        
+
         Args:
             self:  (Cmd)
             setter: (Tangible) object setting pose
@@ -79,37 +80,15 @@ class CmdPose(MuxCommand):
         """Basic pose, power pose, room posing - all in one"""
         cmd = self.cmdstring
         opt = self.switches
-        args = unicode(self.args).strip()
+        args = self.args.strip()
         lhs, rhs = self.lhs, self.rhs
+        sess = self.session
         char = self.character
         account = self.account
         here = char.location if char else None
-        power = True if self.cmdstring == 'ppose' or self.cmdstring == 'pp' or self.cmdstring == 'p:' else False
-
-        def parse_pose(text):
-            return_text = []
-            for each in text.split():
-                match = None
-                new_each = each
-                word_end = ''
-                if each.startswith('/'):  # A possible substitution to test
-                    if each.endswith('/'):  # Skip this one, it's /italic/
-                        return_text.append(new_each)
-                        continue
-                    search_word = each[1:]
-                    if search_word.startswith('/'):  # Skip this one, it's being escaped
-                        new_each = each[1:]
-                    else:  # Marked for substitution, try to find a match
-                        if "'" in each:  # Test for possessive or contraction:  's  (apostrophe before end of grouping)
-                            pass
-                        if each[-1] in ".,!?":
-                            search_word, word_end = search_word[:-1], each[-1]
-                        match = char.search(search_word, quiet=True)
-                return_text.append(new_each if not match else (match[0].get_display_name(char) + word_end))
-            return ' '.join(return_text)
-
-        raw_pose = rhs if rhs and power else args
-        raw_pose = parse_pose(raw_pose)
+        power = True if cmd in ('ppose', 'pp', 'p:') else False
+        raw_pose = rhs if rhs and cmd == 'do' or power else args
+        raw_pose = substitute_objects(raw_pose, char)
         non_space_chars = ['®', '©', '°', '·', '~', '@', '-', "'", '’', ',', ';', ':', '.', '?', '!', '…']
         magnet = True if raw_pose and raw_pose[0] in non_space_chars or cmd == ";" else False
         doing = True if 'do' in cmd or 'rp' in cmd else False
@@ -152,7 +131,7 @@ class CmdPose(MuxCommand):
             elif not rhs:
                 self.set_doing(char, pose)  # Setting temp doing message on the setter...
                 if args and not ('silent' in opt or 'quiet' in opt) and char is target:  # Allow set without posing
-                    account.execute_cmd(';%s' % pose)  # pose to the room like a normal pose would.
+                    account.execute_cmd(';%s' % pose, session=sess)  # pose to the room like a normal pose would.
             char.msg("Pose now set to: '%s'" % target.get_display_name(char, pose=True))  # Display name with pose.
         else:  # ---- Action pose, not static Room Pose. ---------------------
             if '|/' in pose:
@@ -161,14 +140,14 @@ class CmdPose(MuxCommand):
                 char.msg("Pose magnet glyphs are %s." % non_space_chars)
             if not (here and char):
                 if args:
-                    account.execute_cmd('pub :%s' % pose)
+                    account.execute_cmd('pub :%s' % pose, session=sess)
                 else:
-                    account.msg('Usage: pose <message>   to pose to public channel.')
+                    self.msg('Usage: pose <message>   to pose to public channel.')
                 return
             if args:
                 if power and self.rhs and 'o' not in self.switches:
                     char.ndb.power_pose = pose
-                    account.execute_cmd(self.rhs)
+                    account.execute_cmd(self.rhs, session=sess)
                 else:
                     ooc = 'ooc' in self.switches
                     prepend_ooc = '[OOC] ' if ooc else ''
@@ -176,4 +155,4 @@ class CmdPose(MuxCommand):
                                        {'type': 'pose', 'ooc': ooc}),
                                       from_obj=char, mapping=dict(char=char))
             else:
-                account.execute_cmd('help pose')
+                account.execute_cmd('help pose', session=sess)

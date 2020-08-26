@@ -63,7 +63,7 @@ def _gamestats():
     nplyrs = AccountDB.objects.num_total_accounts() or "none"
     nplyrs_reg_recent = len(AccountDB.objects.get_recently_created_accounts()) or "none"
     nsess = SESSION_HANDLER.account_count()
-    # nsess = len(PlayerDB.objects.get_connected_players()) or "no one"
+    # nsess = len(AccountDB.objects.get_connected_accounts()) or "no one"
 
     nobjs = ObjectDB.objects.all().count()
     nrooms = ObjectDB.objects.filter(db_location__isnull=True).exclude(db_typeclass_path=_BASE_CHAR_TYPECLASS).count()

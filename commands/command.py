@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Commands
 
@@ -77,7 +77,7 @@ class Command(BaseCommand):
         by the `cmdhandler` right after `self.parser()` finishes, and so has access
         to all the variables defined therein.
         """
-        self.caller.msg('Command "%s" called!' % self.cmdstring)
+        self.msg('Command "%s" called!' % self.cmdstring)
 
     def at_post_cmd(self):
         """
@@ -118,13 +118,14 @@ class MuxCommand(default_cmds.MuxCommand):
     strings, but case is preserved.
     """
     account_caller = True  # By default, assume caller is account.
-    parse_using = ''  # If set, use additional left/right delimiter.
-    options = ()  # If set, use only these options, ignoring any others.
 
     def at_pre_cmd(self):
         """
         This hook is called before self.parse() on all commands
         """
+        if self.args.strip() in ('/help', '#help', 'help', '?'):
+            self.account.execute_cmd(('help ' + self.cmdstring).lower())
+            return True
         self.command_time = time.time()
 
     def parse(self):
@@ -134,29 +135,6 @@ class MuxCommand(default_cmds.MuxCommand):
         that can be later accessed from self.func()
         """
         super(MuxCommand, self).parse()
-        # Parse mux options, comparing them against user-provided options, expanding abbreviations.
-        if self.options and self.switches:  # If specific options are known, test them against given options.
-            valid_options,  unuse_options, extra_options = [], [], []
-            for element in self.switches:
-                option_check = [each for each in self.options if each.lower().startswith(element.lower())]
-                if len(option_check) > 1:
-                    extra_options += option_check    # Either the option provided is ambiguous,
-                elif len(option_check) == 1:
-                    valid_options += option_check    # or it is a valid option abbreviation,
-                elif len(option_check) == 0:
-                    unuse_options += [element]       # or an extraneous option to be ignored.
-            if extra_options:
-                self.caller.msg('|g%s|n: |wAmbiguous option used. Did you mean /|C%s|w?' %
-                                (self.cmdstring, '|nor /|C'.join(extra_options)))
-            if valid_options:
-                self.switches = valid_options
-            if unuse_options:
-                plural = '' if len(unuse_options) == 1 else 's'
-                self.caller.msg('|g%s|n: |wExtra option%s "/|C%s|w" ignored.' %
-                                (self.cmdstring, plural, '|n, /|C'.join(unuse_options)))
-        # Now parse left/right sides using a custom delimiter, if provided.
-        if self.parse_using and self.parse_using in self.args:
-            self.lhs, self.rhs = self.args.split(self.parse_using, 1)  # At most, split once, into left and right parts.
 
     def func(self):
         """
@@ -187,8 +165,8 @@ class MuxCommand(default_cmds.MuxCommand):
         command_time = time.time() - self.command_time
         if account:
             account.db._command_time_total = (0 if account.db._command_time_total is None
-                                             else account.db._command_time_total) + command_time
-        if char:
+                                              else account.db._command_time_total) + command_time
+        if char and hasattr(char, 'traits'):
             if char.traits.ct is None:
                 char.traits.add('ct', 'Core Time', 'counter')
             if char.traits.cc is None:

@@ -352,7 +352,7 @@ class CmdCover(MuxCommand):
     Covers a worn item of clothing with another you're holding or wearing.
 
     Usage:
-        cover <obj> <=|with> <obj>
+        cover <obj> <=||with> <obj>
 
     When you cover a clothing item, it is hidden and no longer appears in
     your description until it's uncovered or the item covering it is removed.
